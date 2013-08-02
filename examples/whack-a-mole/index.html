@@ -9,7 +9,7 @@
     </head>
     <body>
         <div id="screen"></div>
-		<script type="text/javascript" src="../../build/melonJS-0.9.8-min.js"></script>
+		<script type="text/javascript" src="../../build/melonJS-0.9.9-min.js"></script>
 		<script type="text/javascript" src="js/game.js"></script>
 		<script type="text/javascript" src="js/resources.js"></script>
 		<script type="text/javascript" src="js/entities/entities.js"></script>
@@ -31,19 +31,12 @@
 					// Scroll away mobile GUI
 					(function () {
 						window.scrollTo(0, 1);
+						me.video.onresize(null);
 					}).defer();
 
 					me.event.subscribe(me.event.WINDOW_ONRESIZE, function (e) {
 						window.scrollTo(0, 1);
-					})
-
-					// Retina viewport settings
-					if (window.devicePixelRatio > 1) {
-						document.getElementById("viewport").setAttribute(
-							"content",
-							"width=device-width, initial-scale=0.5, maximum-scale=0.5, user-scalable=0"
-						);
-					}
+					});
 				}
 			});
 		</script>

@@ -11,7 +11,7 @@
 	 * GUI Object<br>
 	 * A very basic object to manage GUI elements <br>
 	 * The object simply register on the "mousedown" <br>
-	 * or "touchstart" event and call the onClicked function" 
+	 * or "touchstart" event and call the onClick function" 
 	 * @class
 	 * @extends me.SpriteObject
 	 * @memberOf me
@@ -36,11 +36,11 @@
 	 *	
 	 *    // output something in the console
 	 *    // when the object is clicked
-	 *    onClick:function()
+	 *    onClick:function(event)
 	 *    {
 	 *       console.log("clicked!");
 	 *       // don't propagate the event
-	 *       return true;
+	 *       return false;
 	 *    }
 	 * });
 	 * 
@@ -96,25 +96,25 @@
 		 * function callback for the mousedown event
 		 * @ignore
 		 */
-		clicked : function() {
+		clicked : function(event) {
 			if (this.isClickable) {
 				this.updated = true;
-				return this.onClick();
+				return this.onClick(event);
 			}
 		},
 	
 		/**
 		 * function called when the object is clicked <br>
 		 * to be extended <br>
-		 * return true if we need to stop propagating the event
+		 * return false if we need to stop propagating the event
 		 * @name onClick
 		 * @memberOf me.GUI_Object
 		 * @public
 		 * @function
+		 * @param {Event} event the event object
 		 */
-		onClick : function() {
-			
-			return true;
+		onClick : function(event) {
+			return false;
 		},
 		
 		/**

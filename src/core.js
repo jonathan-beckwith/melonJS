@@ -72,11 +72,11 @@ window.me = window.me || {};
 		 */
 		localStorage : (typeof($.localStorage) === 'object'),
 		/**
-		 * Browser Gyroscopic Motion Event capabilities (read-only) <br>
+		 * Browser accelerometer capabilities (read-only) <br>
 		 * @type Boolean
 		 * @memberOf me.sys
 		 */
-		gyro : ($.DeviceMotionEvent !== undefined),
+		hasAccelerometer : false,
 
 		/**
 		 * Browser Base64 decoding capability (read-only) <br>
@@ -149,15 +149,6 @@ window.me = window.me || {};
 		cacheImage : false,
 
 		/**
-		 * Enable dirtyRegion Feature <br>
-		 * default value : false<br>
-		 * (!) not fully implemented/supported (!)
-		 * @type Boolean
-		 * @memberOf me.sys
-		 */
-		dirtyRegion : false,
-
-		/**
 		 * Specify either to stop on audio loading error or not<br>
 		 * if me.debug.stopOnAudioLoad is true, melonJS will throw an exception and stop loading<br>
 		 * if me.debug.stopOnAudioLoad is false, melonJS will disable sounds and output a warning message in the console <br>
@@ -168,12 +159,29 @@ window.me = window.me || {};
 		stopOnAudioError : true,
 
 		/**
-		 * Specify either to pause the game when losing focus or not<br>
+		 * Specify whether to pause the game when losing focus.<br>
 		 * default value : true<br>
 		 * @type Boolean
 		 * @memberOf me.sys
 		 */
 		pauseOnBlur : true,
+
+		/**
+		 * Specify whether to unpause the game when gaining focus.<br>
+		 * default value : true<br>
+		 * @type Boolean
+		 * @memberOf me.sys
+		 */
+		resumeOnFocus : true,
+
+		/**
+		 * Specify whether to stop the game when losing focus or not<br>
+		 * The engine restarts on focus if this is enabled.
+		 * default value : true<br>
+		 * @type Boolean
+		 * @memberOf me.sys
+		 */
+		stopOnBlur : true,
 
 		/**
 		 * Specify the rendering method for layers <br>
@@ -476,6 +484,11 @@ window.me = window.me || {};
 		};
 	};
 
+	/**
+	 * The built in Function Object
+	 * @external Function
+	 * @see {@link https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Function|Function}
+	 */
 	
 	if (!Function.prototype.bind) {
 		/** @ignore */
@@ -485,6 +498,8 @@ window.me = window.me || {};
 		 * Binds this function to the given context by wrapping it in another function and returning the wrapper.<p>
 		 * Whenever the resulting "bound" function is called, it will call the original ensuring that this is set to context. <p>
 		 * Also optionally curries arguments for the function.
+		 * @memberof! external:Function#
+		 * @alias bind
 		 * @param {Object} context the object to bind to.
 		 * @param {} [arguments...] Optional additional arguments to curry for the function.
 		 * @example
@@ -579,13 +594,13 @@ window.me = window.me || {};
 
 	/**
 	 * Executes a function as soon as the interpreter is idle (stack empty).
+	 * @memberof! external:Function#
+	 * @alias defer
 	 * @param {} [arguments...] Optional additional arguments to curry for the function.
 	 * @return {Int} id that can be used to clear the deferred function using clearTimeout
 	 * @example
-	 *
-	 *   // execute myFunc() when the stack is empty, with 'myArgument' as parameter
-	 *   myFunc.defer('myArgument');
-	 *
+	 * // execute myFunc() when the stack is empty, with 'myArgument' as parameter
+	 * myFunc.defer('myArgument');
 	 */
 	Function.prototype.defer = function() {
 		var fn = this, args = Array.prototype.slice.call(arguments);
@@ -618,11 +633,17 @@ window.me = window.me || {};
 		}
 	};
 
-
+	/**
+	 * The built in String Object
+	 * @external String
+	 * @see {@link https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/String|String}
+	 */
+	
 	if(!String.prototype.trim) {  
 		/**
 		 * returns the string stripped of whitespace from both ends
-		 * @extends String
+		 * @memberof! external:String#
+		 * @alias trim
 		 * @return {String} trimmed string
 		 */
 		String.prototype.trim = function () {  
@@ -632,7 +653,8 @@ window.me = window.me || {};
 	
 	/**
 	 * add isNumeric fn to the string object
-	 * @extends String
+	 * @memberof! external:String#
+	 * @alias isNumeric
 	 * @return {Boolean} true if string contains only digits
 	 */
 	String.prototype.isNumeric = function() {
@@ -641,7 +663,8 @@ window.me = window.me || {};
 
 	/**
 	 * add a isBoolean fn to the string object
-	 * @extends String
+	 * @memberof! external:String#
+	 * @alias isBoolean
 	 * @return {Boolean} true if the string is either true or false
 	 */
 	String.prototype.isBoolean = function() {
@@ -650,8 +673,9 @@ window.me = window.me || {};
 
 	/**
 	 * add a contains fn to the string object
+	 * @memberof! external:String#
+	 * @alias contains
 	 * @param {String} string to test for
-	 * @extends String
 	 * @return {Boolean} true if contains the specified string
 	 */
 	String.prototype.contains = function(word) {
@@ -660,7 +684,8 @@ window.me = window.me || {};
 
 	/**
 	 * convert the string to hex value
-	 * @extends String
+	 * @memberof! external:String#
+	 * @alias toHex
 	 * @return {String}
 	 */
 	String.prototype.toHex = function() {
@@ -671,12 +696,18 @@ window.me = window.me || {};
 		return res;
 	};
 
-
+	/**
+	 * The built in Number Object
+	 * @external Number
+	 * @see {@link https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Number|Number}
+	 */
+	 
 	/**
 	 * add a clamp fn to the Number object
+	 * @memberof! external:Number#
+	 * @alias clamp
 	 * @param {Number} low lower limit
 	 * @param {Number} high higher limit
-	 * @extends Number
 	 * @return {Number} clamped value
 	 */
 	Number.prototype.clamp = function(low, high) {
@@ -685,9 +716,10 @@ window.me = window.me || {};
 
 	/**
 	 * return a random between min, max
+	 * @memberof! external:Number#
+	 * @alias random
 	 * @param {Number} min minimum value.
 	 * @param {Number} max maximum value.
-	 * @extends Number
 	 * @return {Number} random value
 	 */
 	Number.prototype.random = function(min, max) {
@@ -696,9 +728,10 @@ window.me = window.me || {};
 
 	/**
 	 * round a value to the specified number of digit
+	 * @memberof! external:Number#
+	 * @alias round
 	 * @param {Number} [num="Object value"] value to be rounded.
 	 * @param {Number} dec number of decimal digit to be rounded to.
-	 * @extends Number
 	 * @return {Number} rounded value
 	 * @example
 	 * // round a specific value to 2 digits
@@ -717,7 +750,8 @@ window.me = window.me || {};
 	/**
 	 * a quick toHex function<br>
 	 * given number <b>must</b> be an int, with a value between 0 and 255
-	 * @extends Number
+	 * @memberof! external:Number#
+	 * @alias toHex
 	 * @return {String} converted hexadecimal value
 	 */
 	Number.prototype.toHex = function() {
@@ -726,7 +760,8 @@ window.me = window.me || {};
 
 	/**
 	 * Returns a value indicating the sign of a number<br>
-	 * @extends Number
+	 * @memberof! external:Number#
+	 * @alias sign
 	 * @return {Number} sign of a the number
 	 */
 	Number.prototype.sign = function() {
@@ -735,8 +770,9 @@ window.me = window.me || {};
 
 	/**
 	 * Converts an angle in degrees to an angle in radians
+	 * @memberof! external:Number#
+	 * @alias degToRad
 	 * @param {Number} [angle="angle"] angle in degrees
-	 * @extends Number
 	 * @return {Number} corresponding angle in radians
 	 * @example
 	 * // convert a specific angle
@@ -751,8 +787,9 @@ window.me = window.me || {};
 
 	/**
 	 * Converts an angle in radians to an angle in degrees.
+	 * @memberof! external:Number#
+	 * @alias radToDeg
 	 * @param {Number} [angle="angle"] angle in radians
-	 * @extends Number
 	 * @return {Number} corresponding angle in degrees
 	 * @example
 	 * // convert a specific angle
@@ -765,10 +802,18 @@ window.me = window.me || {};
 		return (angle||this) * (180.0 / Math.PI);
 	};
 	
+	
+	/**
+	 * The built in Array Object
+	 * @external Array
+	 * @see {@link https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array|Array}
+	 */
+	
 	/**
 	 * Remove the specified object from the Array<br>
+	 * @memberof! external:Array#
+	 * @alias remove
 	 * @param {Object} object to be removed
-	 * @extends Array
 	 */
 	Array.prototype.remove = function(obj) {
 		var i = Array.prototype.indexOf.call(this, obj);
@@ -825,14 +870,19 @@ window.me = window.me || {};
 		// detect platform
 		me.sys.isMobile = me.sys.ua.match(/Android|iPhone|iPad|iPod|BlackBerry|Windows Phone|Mobile/i);
 
+		// accelerometer detection
+		me.sys.hasAccelerometer = (
+			(typeof (window.DeviceMotionEvent) !== 'undefined') || (
+				(typeof (window.Windows) !== 'undefined') && 
+				(typeof (Windows.Devices.Sensors.Accelerometer) === 'function')
+			)
+		);
+
 		// init the FPS counter if needed
 		me.timer.init();
 
 		// create a new map reader instance
 		me.mapReader = new me.TMXMapReader();
-
-		// create a default loading screen
-		me.loadingScreen = new me.DefaultLoadingScreen();
 
 		// init the App Manager
 		me.state.init();
@@ -846,202 +896,6 @@ window.me = window.me || {};
 		me_initialized = true;
 
 	}
-
-	/******************************************/
-	/*		OBJECT DRAWING MANAGEMENT           */
-	/*		hold & manage app/game objects		*/
-	/******************************************/
-
-	/**
-	 * a object drawing manager
-	 * only used by the game manager
-	 * @ignore
-	 */
-	var drawManager = (function() {
-		// hold public stuff in our singletong
-		var api = {};
-
-		// list of region to redraw
-		// valid for any updated object
-		var dirtyRects = [];
-
-		// cache the full screen area rect
-		var fullscreen_rect;
-
-		// list of object to redraw
-		// only valid for visible and update object
-		var dirtyObjects = [];
-		
-		var drawCount = 0;
-
-		// a flag indicating if we need a redraw
-		api.isDirty = false;
-
-		/**
-		 * init function
-		 */
-		api.reset = function() {
-			// make sure it's empty
-			dirtyRects.length = 0;
-			dirtyObjects.length = 0;
-
-			// set our cached rect to the actual screen size
-			fullscreen_rect = me.game.viewport.getRect();
-
-			// make everything dirty
-			api.makeAllDirty();
-		};
-
-		/**
-		 * add a dirty object
-		 * I should find a cleaner way to manage old/new object rect
-		 */
-		api.makeDirty = function(obj, updated, oldRect) {
-			// object updated ?
-			if (updated) {
-				// yeah some drawing job to do !
-				api.isDirty = true;
-
-				// add a dirty rect if feature enable
-				if (me.sys.dirtyRegion) {
-					// TODO : HOW DO WE MANAGE COORDINATES 
-					// OF FLOATING OBJECT'S RECTS ?
-					
-					// some stuff to optimize the amount
-					// of dirty rect would be nice here
-					// instead of adding everything :)
-					// this is for later I guess !
-					if (oldRect) {
-						// merge both rect, and add it to the list
-						// directly pass object, since anyway it inherits from rect
-						dirtyRects.push(oldRect.union(obj));
-					} else if (obj.getRect) {
-						dirtyRects.push(obj.getRect());
-					}
-				}
-			}
-
-			// if obj is in the viewport add it to the list of obj to draw
-			if (obj.inViewport) {
-				// add obj at index 0, so that we can keep
-				// our inverted loop later
-				dirtyObjects.unshift(obj);
-			}
-		};
-
-		/**
-		 * make all object dirty
-		 */
-		api.makeAllDirty = function() {
-			//empty the dirty rect list
-			dirtyRects.length = 0;
-			//and add a dirty region with the screen area size
-			dirtyRects.push(fullscreen_rect);
-			// make sure it's dirty
-			api.isDirty = true;
-			// they are maybe too much call to this function
-			// to be checked later...
-			//console.log("making everything dirty!");
-		};
-
-		/**
-		 * remove an object
-		 */
-		api.remove = function(obj) {
-			var idx = dirtyObjects.indexOf(obj);
-			if (idx !== -1) {
-				// remove the object from the list of obj to draw
-				dirtyObjects.splice(idx, 1);
-
-				// mark the object as not within the viewport
-				// so it won't be added (again) in the list object to be draw
-				obj.inViewport = false;
-
-				// and flag the area as dirty
-				api.makeDirty(obj, true);
-			}
- 		};
-		
-		/**
-		 * return the amount of draw object per frame
-		 */
-		api.getDrawCount = function() {
-			return drawCount;
- 		};
-		
-		/**
-		 * draw all dirty objects/regions
-		 */
-		api.draw = function(context) {
-			// cache viewport position vector
-			var posx = me.game.viewport.pos.x + ~~me.game.viewport.offset.x;
-			var posy = me.game.viewport.pos.y + ~~me.game.viewport.offset.y;
-						
-			// save the current context
-			context.save();
-			// translate by default to screen coordinates
-			context.translate(-posx, -posy);
-			
-			// substract the map offset to current the current pos
-			posx -= me.game.currentLevel.pos.x;
-			posy -= me.game.currentLevel.pos.y;
-			
-			// if feature disable, we only have one dirty rect (the viewport area)
-			for ( var r = dirtyRects.length, rect; r--, rect = dirtyRects[r];) {
-				// parse all objects
-				for ( var o = dirtyObjects.length, obj; o--, obj = dirtyObjects[o];) {
-					// if dirty region enabled, make sure the object is in the area to be refreshed
-					if (me.sys.dirtyRegion && obj.isSprite && !obj.overlaps(rect)) {
-						continue;
-					}
-
-					if (obj.floating===true) {
-						context.save();
-						// cancel the previous translate
-						context.translate(posx, posy);
-					}
-
-					// draw the object using the dirty area to be updated
-					obj.draw(context, rect);
-
-					if (obj.floating===true) {
-						context.restore();
-					}
-
-					drawCount++;
-				}
-				// some debug stuff
-				if (me.debug.renderDirty) {
-					rect.draw(context, "white");
-				}
-			}
-			
-			// restore initial context
-			context.restore();
-		};
-
-		/**
-		 * flush all rect
-		 */
-		api.flush = function() {
-			// only empty dirty area list if dirtyRec feature is enable
-			// allows to keep the viewport area as a default dirty rect
-			if (me.sys.dirtyRegion) {
-				dirtyRects.length = 0;
-			}
-			// empty the dirty object list
-			dirtyObjects.length = 0;
-
-			// clear the flag
-			api.isDirty = false;
-
-			// reset draw count for debug panel
-			drawCount = 0;
-		};
-
-		return api;
-
-	})();
 
 	/**
 	 * me.game represents your current game, it contains all the objects, tilemap layers,<br>
@@ -1063,26 +917,14 @@ window.me = window.me || {};
 		// ref to the "system" context
 		var frameBuffer = null;
 
-		// hold all the objects
-		var gameObjects = [];
-
 		// flag to redraw the sprites
 		var initialized = false;
 
 		// to keep track of deferred stuff
 		var pendingRemove = null;
-		var pendingSort = null;
-		
-		/**
-		 * a default sort function
-		 * @private
-		 * @ignore
-		 */
-		var default_sort_func = function(a, b) {
-			// sort order is inverted,
-			// since we use a reverse loop for the display
-			return (b.z - a.z);
-		};
+
+		// to know when we have to refresh the display
+		var isDirty = true;
 
 		/*---------------------------------------------
 
@@ -1105,6 +947,7 @@ window.me = window.me || {};
 		 * @memberOf me.game
 		 */
 		api.HUD = null;
+		
 		/**
 		 * a reference to the game collision Map
 		 * @public
@@ -1113,6 +956,7 @@ window.me = window.me || {};
 		 * @memberOf me.game
 		 */
 		api.collisionMap = null;
+		
 		/**
 		 * a reference to the game current level
 		 * @public
@@ -1122,6 +966,27 @@ window.me = window.me || {};
 		 */
 		api.currentLevel = null;
 
+		/**
+		 * a reference to the game world <br>
+		 * a world is a virtual environment containing all the game objects
+		 * @public
+		 * @type me.EntityContainer
+		 * @name world
+		 * @memberOf me.game
+		 */
+		api.world = null;
+
+
+		/**
+		 * The property of should be used when sorting entities <br>
+		 * value : "x", "y", "z" (default: "z")
+		 * @public
+		 * @type String
+		 * @name sortOn
+		 * @memberOf me.game
+		 */
+		api.sortOn = "z";
+		
 		/**
 		 * default layer renderer
 		 * @private
@@ -1197,12 +1062,21 @@ window.me = window.me || {};
 				// create a defaut viewport of the same size
 				api.viewport = new me.Viewport(0, 0, width, height);
 
+				//the root object of our world is an entity container
+				api.world = new me.EntityContainer(0,0, width, height);
+				// give it a name
+				api.world.name = 'rootContainer';
+
 				// get a ref to the screen buffer
 				frameBuffer = me.video.getSystemContext();
 
 				// publish init notification
 				me.event.publish(me.event.GAME_INIT);
 
+				// make display dirty by default
+				isDirty = true;
+
+				// set as initialized
 				initialized = true;
 			}
 		};
@@ -1224,15 +1098,12 @@ window.me = window.me || {};
 			}
 
 			// remove all objects
-			api.removeAll(true);
+			api.removeAll();
 
 			// reset the viewport to zero ?
 			if (api.viewport) {
 				api.viewport.reset();
 			}
-			
-			// also reset the draw manager
-			drawManager.reset();
 
 			// reset the transform matrix to the normal one
 			frameBuffer.setTransform(1, 0, 0, 1, 0, 0);
@@ -1251,6 +1122,10 @@ window.me = window.me || {};
 		 */
 
 		api.loadTMXLevel = function(level) {
+			
+			// disable auto-sort
+			api.world.autoSort = false;
+			
 			// load our map
 			api.currentLevel = level;
 
@@ -1291,7 +1166,10 @@ window.me = window.me || {};
 			}
 
 			// sort all our stuff !!
-			api.sort();
+			api.world.sort();
+			
+			// re-enable auto-sort
+			api.world.autoSort = true;
 
 			// fire the callback if defined
 			if (api.onLevelLoaded) {
@@ -1313,16 +1191,15 @@ window.me = window.me || {};
 		 * @example
 		 * // create a new object
 		 * var obj = new MyObject(x, y)
-		 * // add the object and give the z index of the current object
+		 * // add the object and force the z index of the current object
 		 * me.game.add(obj, this.z);
-		 * // sort the object list (to ensure the object is properly displayed)
-		 * me.game.sort();
 		 */
 		api.add = function(object, zOrder) {
-			object.z = (zOrder) ? zOrder : object.z;
-
+			if (typeof(zOrder) !== 'undefined') {
+				object.z = zOrder;
+			}
 			// add the object in the game obj list
-			gameObjects.push(object);
+			api.world.addChild(object);
 
 		};
 
@@ -1346,6 +1223,7 @@ window.me = window.me || {};
 		 * as defined in Tiled (Name field of the Object Properties)<br>
 		 * note : avoid calling this function every frame since
 		 * it parses the whole object list each time
+		 * @deprecated use me.game.world.getEntityByProp();
 		 * @name getEntityByName
 		 * @memberOf me.game
 		 * @public
@@ -1353,51 +1231,15 @@ window.me = window.me || {};
 		 * @param {String} entityName entity name
 		 * @return {me.ObjectEntity[]} Array of object entities
 		 */
-		api.getEntityByName = function(entityName)
-		{
-			var objList = [];
-			entityName = entityName.toLowerCase();
-			for (var i = gameObjects.length, obj; i--, obj = gameObjects[i];) {
-				if(obj.name && obj.name.toLowerCase() === entityName) {
-					objList.push(obj);
-				}
-			}
-			return objList;
+		api.getEntityByName = function(entityName) {
+			return api.world.getEntityByProp("name", entityName);
 		};
-
-		/**
-		 * returns the amount of existing objects<br>
-		 * @name getObjectCount
-		 * @memberOf me.game
-		 * @protected
- 		 * @ignore
-		 * @function
-		 * @return {Number} the amount of object
-		 */
-		api.getObjectCount = function()
-		{
-			return gameObjects.length;
-		};
-
-		/**
-		 * returns the amount of object being drawn per frame<br>
-		 * @name getDrawCount
-		 * @memberOf me.game
-		 * @protected
- 		 * @ignore
-		 * @function
-		 * @return {Number} the amount of object draws
-		 */
-		api.getDrawCount = function()
-		{
-			return drawManager.getDrawCount();
-		};
-
 		
 		/**
 		 * return the entity corresponding to the specified GUID<br>
 		 * note : avoid calling this function every frame since
 		 * it parses the whole object list each time
+		 * @deprecated use me.game.world.getEntityByProp();
 		 * @name getEntityByGUID
 		 * @memberOf me.game
 		 * @public
@@ -1405,20 +1247,16 @@ window.me = window.me || {};
 		 * @param {String} GUID entity GUID
 		 * @return {me.ObjectEntity} Object Entity (or null if not found)
 		 */
-		api.getEntityByGUID = function(guid)
-		{
-			for (var i = gameObjects.length, obj; i--, obj = gameObjects[i];) {
-				if(obj.isEntity && obj.GUID == guid) {
-					return obj;
-				}
-			}
-			return null;
+		api.getEntityByGUID = function(guid) {
+			var obj = api.world.getEntityByProp("GUID", guid);
+			return (obj.length>0)?obj[0]:null;
 		};
 		
 		/**
 		 * return the entity corresponding to the property and value<br>
 		 * note : avoid calling this function every frame since
 		 * it parses the whole object list each time
+		 * @deprecated use me.game.world.getEntityByProp();
 		 * @name getEntityByProp
 		 * @memberOf me.game
 		 * @public
@@ -1427,17 +1265,10 @@ window.me = window.me || {};
 		 * @param {String} value Value of the property
 		 * @return {me.ObjectEntity[]} Array of object entities
 		 */
-		api.getEntityByProp = function(prop, value)
-		{
-			var objList = [];
-			for (var i = gameObjects.length, obj; i--, obj = gameObjects[i];) {
-				if(obj.isEntity && obj[prop] == value) {
-					objList.push(obj);
-				}
-			}
-			return objList;
+		api.getEntityByProp = function(prop, value) {
+			return api.world.getEntityByProp(prop, value);
 		};
-
+		
 		/**
 		 * add a HUD obj to the game manager
 		 * @name addHUD
@@ -1478,41 +1309,6 @@ window.me = window.me || {};
 			}
 		};
 
-		/**
-		 * update all objects of the game manager
-		 * @name update
-		 * @memberOf me.game
-		 * @private
-		 * @ignore
-		 * @function
-		 */
-		api.update = function() {
-			
-			// previous rect (if any)
-			var oldRect = null;
-			// loop through our objects
-			for ( var i = gameObjects.length, obj; i--, obj = gameObjects[i];) {
-				// check for previous rect before position change
-				oldRect = (me.sys.dirtyRegion && obj.isSprite) ? obj.getRect() : null;
-
-				// check if object is visible
-				obj.inViewport = obj.visible && (
-					obj.floating || (obj.getRect && api.viewport.isVisible(obj))
-				);
-
-				// update our object
-				var updated = (obj.inViewport || obj.alwaysUpdate) && obj.update();
-
-				// add it to the draw manager
-				drawManager.makeDirty(obj, updated, updated ? oldRect : null);
-			}
-			// update the camera/viewport
-			if (api.viewport.update(drawManager.isDirty)) {
-				drawManager.makeAllDirty();
-			}
-			
-		};
-		
 		
 		/**
 		 * remove an object
@@ -1525,34 +1321,18 @@ window.me = window.me || {};
 		 * <strong>WARNING</strong>: Not safe to force asynchronously (e.g. onCollision callbacks)
 		 */
 		api.remove = function(obj, force) {
-
-			// Private function to do object removal
-			function removeNow(target) {
-				// notify the object it will be destroyed
-				if (target.destroy) {
-					target.destroy();
-				}
-
-				// remove the object from the object to draw
-				drawManager.remove(target);
-
-				// Remove the object
-				gameObjects.remove(target);
-				me.entityPool.freeInstance(target);
-			}
-
-			if (gameObjects.indexOf(obj) > -1) {
+			if (api.world.hasChild(obj)) {
 				// remove the object from the object list
 				if (force===true) {
 					// force immediate object deletion
-					removeNow(obj);
+					api.world.removeChild(obj);
 				} else {
 					// make it invisible (this is bad...)
-					obj.visible = false;
-					// else wait the end of the current loop
+					obj.visible = obj.inViewport = false;
+					// wait the end of the current loop
 					/** @ignore */
 					pendingRemove = (function (obj) {
-						removeNow(obj);
+						me.game.world.removeChild(obj);
 						pendingRemove = null;
 					}).defer(obj);
 				}
@@ -1568,74 +1348,38 @@ window.me = window.me || {};
 		 * @public
 		 * @function
 		 */
-		api.removeAll = function(force) {
+		api.removeAll = function() {
 			//cancel any pending tasks
 			if (pendingRemove) {
 				clearTimeout(pendingRemove);
 				pendingRemove = null;
 			}
-			if (pendingSort) {
-				clearTimeout(pendingSort);
-				pendingSort = null;
-			}
-			
-			// inform all object they are about to be deleted
-			for (var i = gameObjects.length ; i-- ;) {
-				if (gameObjects[i].isPersistent) {
-                   // don't remove persistent objects
-				   continue;
-				}
-				// remove the entity
-				api.remove(gameObjects[i], force);
-			}
-			// make sure it's empty there as well
-			if (force === true)
-				drawManager.flush();
+			// destroy all objects in the root container
+			api.world.destroy();
 		};
 
 		/**
-		 * <p>Sort all the game objects.</p>
-		 * <p>Normally all objects loaded through the LevelDirector are automatically sorted.
-		 * this function is however usefull if you create and add object during the game,
-		 * or need a specific sorting algorithm.<p>
+		 * Manually trigger the sort all the game objects.</p>
+		 * Since version 0.9.9, all objects are automatically sorted, <br>
+		 * except if a container autoSort property is set to false.
+		 * @deprecated use me.game.world.sort();
 		 * @name sort
 		 * @memberOf me.game
 		 * @public
 		 * @function
-		 * @param {Function} [sort_func="sorted on z property value"] sort function
 		 * @example
-		 * // user defined sort funtion (Z sort based on Y value)
-		 * function mySort(a, b) {
-		 *    var result = (b.z - a.z);
-		 *    return (result ? result : ((b.pos && b.pos.y) - (a.pos && a.pos.y)) || 0);
-		 * } </p>
-		 * // call me.game.sort with our sorting function
-		 * me.game.sort(mySort);
+		 * // change the default sort property
+		 * me.game.sortOn = "y";
+		 * // manuallly call me.game.sort with our sorting function
+		 * me.game.sort();
 		 */
-
-		api.sort = function(sort_func) {
-			// do nothing if there is already 
-			// a previous pending sort
-			if (pendingSort === null) {
-				// use the default sort function if
-				// the specified one is not valid
-				if (typeof(sort_func) !== "function") {
-					sort_func = default_sort_func;
-				}
-				/** @ignore */
-				pendingSort = (function (sort_func) {
-					// sort everything
-					gameObjects.sort(sort_func);
-					// clear the defer id
-					pendingSort = null;
-					// make sure we redraw everything
-					me.game.repaint();
-				}).defer(sort_func);
-			};
+		api.sort = function() {
+			api.world.sort();
 		};
 
 		/**
 		 * Checks if the specified entity collides with others entities.
+		 * @deprecated use me.game.world.collide();
 		 * @name collide
 		 * @memberOf me.game
 		 * @public
@@ -1672,76 +1416,23 @@ window.me = window.me || {};
 		 * }
 		 */
 		api.collide = function(objA, multiple) {
-			var res;
-			// make sure we have a boolean
-			multiple = multiple===true ? true : false;
-			if (multiple===true) {
-				var mres = [], r = 0;
-			} 
-			// this should be replace by a list of the 4 adjacent cell around the object requesting collision
-			for ( var i = gameObjects.length, obj; i--, obj = gameObjects[i];)//for (var i = objlist.length; i-- ;)
-			{
-				if ((obj.inViewport || obj.alwaysUpdate) && obj.collidable && (obj!=objA))
-				{
-					res = obj.collideVsAABB.call(obj, objA);
-					if (res.x != 0 || res.y != 0) {
-						// notify the object
-						obj.onCollision.call(obj, res, objA);
-						// return the type (deprecated)
-						res.type = obj.type;
-						// return a reference of the colliding object
-						res.obj  = obj;
-						// stop here if we don't look for multiple collision detection
-						if (!multiple) {
-							return res;
-						}
-						mres[r++] = res;
-					}
-				}
-			}
-			return multiple?mres:null;
+			return api.world.collide (objA, multiple);
 		};
 
 		/**
 		 * Checks if the specified entity collides with others entities of the specified type.
+		 * @deprecated use me.game.world.collideType();
 		 * @name collideType
 		 * @memberOf me.game
 		 * @public
 		 * @function
 		 * @param {me.ObjectEntity} obj Object to be tested for collision
-		 * @param {String} type Entity type to be tested for collision
+		 * @param {String} type Entity type to be tested for collision (null to disable type check)
 		 * @param {Boolean} [multiple=false] check for multiple collision
 		 * @return {me.Vector2d} collision vector or an array of collision vector (multiple collision){@link me.Rect#collideVsAABB}
 		 */
 		api.collideType = function(objA, type, multiple) {
-			var res;
-			// make sure we have a boolean
-			multiple = multiple===true ? true : false;
-			if (multiple===true) {
-				var mres = [], r = 0;
-			} 
-			// this should be replace by a list of the 4 adjacent cell around the object requesting collision
-			for ( var i = gameObjects.length, obj; i--, obj = gameObjects[i];)//for (var i = objlist.length; i-- ;)
-			{
-				if ((obj.inViewport || obj.alwaysUpdate) && obj.collidable && (obj.type === type) && (obj!=objA))
-				{
-					res = obj.collideVsAABB.call(obj, objA);
-					if (res.x != 0 || res.y != 0) {
-						// notify the object
-						obj.onCollision.call(obj, res, objA);
-						// return the type (deprecated)
-						res.type = obj.type;
-						// return a reference of the colliding object
-						res.obj  = obj;
-						// stop here if we don't look for multiple collision detection
-						if (!multiple) {
-							return res;
-						}
-						mres[r++] = res;
-					}
-				}
-			}
-			return multiple?mres:null;
+			return api.world.collideType (objA, type, multiple);
 		};
 
 		/**
@@ -1753,8 +1444,30 @@ window.me = window.me || {};
 		 */
 
 		api.repaint = function() {
-			drawManager.makeAllDirty();
+			isDirty = true;
 		};
+
+
+		/**
+		 * update all objects of the game manager
+		 * @name update
+		 * @memberOf me.game
+		 * @private
+		 * @ignore
+		 * @function
+		 */
+		api.update = function() {
+			
+			// update all objects
+			isDirty = api.world.update();
+			
+			// update the camera/viewport
+			isDirty |= api.viewport.update(isDirty);
+
+			return isDirty;
+			
+		};
+		
 
 		/**
 		 * draw all existing objects
@@ -1766,15 +1479,33 @@ window.me = window.me || {};
 		 */
 
 		api.draw = function() {
-			if (drawManager.isDirty) {
-				// draw our objects
-				drawManager.draw(frameBuffer);
+			if (isDirty) {
+				// cache the viewport rendering position, so that other object
+				// can access it later (e,g. entityContainer when drawing floating objects)
+				api.viewport.screenX = api.viewport.pos.x + ~~api.viewport.offset.x;
+				api.viewport.screenY = api.viewport.pos.y + ~~api.viewport.offset.y;
+							
+				// save the current context
+				frameBuffer.save();
+				// translate by default to screen coordinates
+				frameBuffer.translate(-api.viewport.screenX, -api.viewport.screenY);
+				
+				// substract the map offset to current the current pos
+				api.viewport.screenX -= api.currentLevel.pos.x;
+				api.viewport.screenY -= api.currentLevel.pos.y;
 
+				// update all objects, 
+				// specifying the viewport as the rectangle area to redraw
+
+				api.world.draw(frameBuffer, api.viewport);
+
+				//restore context
+				frameBuffer.restore();
+				
 				// call the viewport draw function (for effects)
-				api.viewport.draw(frameBuffer)
+				api.viewport.draw(frameBuffer);
 			}
-			// clean everything for next frame
-			drawManager.flush();
+			isDirty = false;
 		};
 
 		// return our object

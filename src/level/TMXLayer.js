@@ -26,9 +26,8 @@
 			
 			this.opacity = 1.0;
 			
-			this.floating = true;
-			
-			this.parent(new me.Vector2d(0, 0), me.game.viewport.width, me.game.viewport.height);
+			this.parent(new me.Vector2d(0, 0), Infinity, Infinity);
+
 		},
 
 		/**
@@ -104,7 +103,7 @@
 	 * @param {int}    height      layer height in pixels
 	 * @param {String} image       image name (as defined in the asset list)
 	 * @param {int}    z           z position
-	 * @param {float}  [ratio=1.0]   scrolling ratio to be applied
+	 * @param {me.Vector2d}  [ratio=1.0]   scrolling ratio to be applied
 	 */
 	 me.ImageLayer = me.Renderable.extend({
 		
@@ -125,12 +124,15 @@
 		/**
 		 * Define the image scrolling ratio<br>
 		 * Scrolling speed is defined by multiplying the viewport delta position (e.g. followed entity) by the specified ratio<br>
-		 * Default value : 1.0 <br>
+		 * Default value : (1.0, 1.0) <br>
+		 * To specify a value through Tiled, use one of the following format : <br> 
+		 * - a number, to change the value for both axis <br>
+		 * - a json expression like `json:{"x":0.5,"y":0.5}` if you wish to specify a different value for both x and y
 		 * @public
-		 * @type float
+		 * @type me.Vector2d
 		 * @name me.ImageLayer#ratio
 		 */
-		ratio: 1.0,
+		ratio: new me.Vector2d(1.0, 1.0),
 	 
 		/**
 		 * constructor
@@ -153,8 +155,18 @@
 			// displaying order
 			this.z = z;
 			
-			// if ratio !=0 scrolling image
-			this.ratio = ratio || 1.0;
+			// default ratio for parallax
+			this.ratio.set(1.0, 1.0);
+
+			if (ratio) {
+				// little hack for backward compatiblity
+				if (typeof(ratio) === "number") {
+					this.ratio.set(ratio, ratio);
+				} else /* vector */ {
+					this.ratio.setV(ratio);
+				}
+			}
+
 			
 			// a cached reference to the viewport
 			this.viewport = me.game.viewport;
@@ -208,7 +220,7 @@
 			});
 			
 			// default origin position
-			this.anchorPoint.set(0,0);
+			this.anchorPoint.set(0, 0);
 			
 		},
 		
@@ -254,7 +266,7 @@
 		 * @function
 		 */
 		update : function() {
-			if (this.ratio===0) {
+			if (0 === this.ratio.x && 0 === this.ratio.y) {
 				// static image
 				return false;
 			}
@@ -264,9 +276,9 @@
 				// parallax / scrolling image
 				if (!this.lastpos.equals(vpos)) {
 					// viewport changed
-					this.pos.x += ((vpos.x - this.lastpos.x) * this.ratio) % this.imagewidth;
+					this.pos.x += ((vpos.x - this.lastpos.x) * this.ratio.x) % this.imagewidth;
 					this.pos.x = (this.imagewidth + this.pos.x) % this.imagewidth;
-					this.pos.y += ((vpos.y - this.lastpos.y) * this.ratio) % this.imageheight;
+					this.pos.y += ((vpos.y - this.lastpos.y) * this.ratio.y) % this.imageheight;
 					this.pos.y = (this.imageheight + this.pos.y) % this.imageheight;
 					this.lastpos.setV(vpos);
 					return true;
@@ -296,7 +308,7 @@
 			context.globalAlpha = this.opacity;
 			
 			// if not scrolling ratio define, static image
-			if (this.ratio===0) {
+			if (0 === this.ratio.x && 0 === this.ratio.y){
 				// static image
 				var sw = Math.min(rect.width, this.imagewidth);
 				var sh = Math.min(rect.height, this.imageheight);
@@ -469,7 +481,7 @@
 			me.TMXUtils.applyTMXPropertiesFromXML(this, layer);
 			
 			// check for the correct rendering method
-			if (this.preRender === undefined) {
+			if (typeof (this.preRender) == 'undefined') {
 				this.preRender = me.sys.preRender;
 			}
 			
@@ -482,12 +494,10 @@
 
 
 			// if pre-rendering method is use, create the offline canvas
-			if (this.preRender) {
+			if (this.preRender === true) {
 				this.layerCanvas = me.video.createCanvas(this.cols * this.tilewidth, this.rows * this.tileheight);
-				this.layerSurface = this.layerCanvas.getContext('2d');
-				// set scaling interpolation filter
-				me.video.setImageSmoothing(this.layerSurface, me.sys.scalingInterpolation);
-					
+				this.layerSurface = me.video.getContext2d(this.layerCanvas);
+
 				// set alpha value for this layer
 				this.layerSurface.globalAlpha = this.opacity;
 			}	
@@ -512,10 +522,10 @@
 			me.TMXUtils.applyTMXPropertiesFromJSON(this, layer);
 			
 			// check for the correct rendering method
-			if (this.preRender === undefined) {
+			if (typeof (this.preRender) == 'undefined') {
 				this.preRender = me.sys.preRender;
 			}
-			
+
 			// detect if the layer is a collision map
 			this.isCollisionMap = (this.name.toLowerCase().contains(me.COLLISION_LAYER));
 			if (this.isCollisionMap && !me.debug.renderCollisionMap) {
@@ -524,11 +534,9 @@
 			}
 
 			// if pre-rendering method is use, create the offline canvas
-			if (this.preRender) {
+			if (this.preRender === true) {
 				this.layerCanvas = me.video.createCanvas(this.cols * this.tilewidth, this.rows * this.tileheight);
-				this.layerSurface = this.layerCanvas.getContext('2d');
-				// set scaling interpolation filter
-				me.video.setImageSmoothing(this.layerSurface, me.sys.scalingInterpolation);				
+				this.layerSurface = me.video.getContext2d(this.layerCanvas);
 				
 				// set alpha value for this layer
 				this.layerSurface.globalAlpha = this.opacity;
@@ -741,10 +749,7 @@
 		 * @ignore
 		 */
 		draw : function(context, rect) {
-			
-			// get a reference to the viewport
-			var vpos = me.game.viewport.pos;
-			
+						
 			// use the offscreen canvas
 			if (this.preRender) {
 			
@@ -753,11 +758,11 @@
 			
 				// draw using the cached canvas
 				context.drawImage(this.layerCanvas, 
-								  vpos.x + rect.pos.x, //sx
-								  vpos.y + rect.pos.y, //sy
+								  rect.pos.x, //sx
+								  rect.pos.y, //sy
 								  width, height,    //sw, sh
-								  vpos.x + rect.pos.x, //dx
-								  vpos.y + rect.pos.y, //dy
+								  rect.pos.x, //dx
+								  rect.pos.y, //dy
 								  width, height);   //dw, dh
 			}
 			// dynamically render the layer
@@ -767,7 +772,7 @@
 				context.globalAlpha = this.opacity;
 
 				// draw the layer
-				this.renderer.drawTileLayer(context, this, vpos, rect);
+				this.renderer.drawTileLayer(context, this, rect);
 				
 				// restore context to initial state
 				context.globalAlpha = _alpha;

@@ -164,6 +164,7 @@
 		var backBufferCanvas = null;
 		var backBufferContext2D = null;
 		var wrapper = null;
+
 		
 		var deferResizeId = -1;
 
@@ -172,6 +173,11 @@
 		var game_height_zoom = 0;
 		var auto_scale = false;
 		var maintainAspectRatio = true;
+		var devicePixelRatio = null;
+		
+		// max display size
+		var maxWidth = Infinity;
+		var maxHeight = Infinity;
 		
 		/**
 		 * return a vendor specific canvas type
@@ -263,31 +269,25 @@
 				return false;
 				
 			// get the 2D context
-			context2D = canvas.getContext('2d');
-			if (!context2D.canvas) {
-				context2D.canvas = canvas;
-			}
-			// set scaling interpolation filter
-			me.video.setImageSmoothing(context2D, me.sys.scalingInterpolation);
+			context2D = api.getContext2d(canvas);
 
 			// create the back buffer if we use double buffering
 			if (double_buffering) {
 				backBufferCanvas = api.createCanvas(game_width, game_height, false);
-				backBufferContext2D = backBufferCanvas.getContext('2d');
-				if (!backBufferContext2D.canvas) {
-					backBufferContext2D.canvas = backBufferCanvas;
-				}
-				// set scaling interpolation filter
-				me.video.setImageSmoothing(backBufferContext2D, me.sys.scalingInterpolation);
+				backBufferContext2D = api.getContext2d(backBufferCanvas);
 			} else {
 				backBufferCanvas = canvas;
 				backBufferContext2D = context2D;
 			}
 			
-			// trigger an initial resize();
-			if (auto_scale) {
-				me.video.onresize(null);
+			// set max the canvas max size if CSS values are defined 
+			if (window.getComputedStyle) {
+				var style = window.getComputedStyle(canvas, null);
+				me.video.setMaxSize(parseInt(style.maxWidth), parseInt(style.maxHeight));
 			}
+			
+			// trigger an initial resize();
+			me.video.onresize(null);
 			
 			return true;
 		};
@@ -338,6 +338,21 @@
 		api.getHeight = function() {
 			return backBufferCanvas.height;
 		};
+		
+		/**
+		 * set the max canvas display size (when scaling)
+		 * @name setMaxSize
+		 * @memberOf me.video
+		 * @function
+		 * @param {Int} width width
+		 * @param {Int} height height
+		 */
+		api.setMaxSize = function(w, h) {
+			// max display size
+			maxWidth = w || Infinity;
+			maxHeight = h || Infinity;
+		};
+
 
 		/**
 		 * Create and return a new Canvas
@@ -363,20 +378,23 @@
 		};
 
 		/**
-		 * Create and return a new 2D Context
-		 * @name createCanvasSurface
+		 * Returns the 2D Context object of the given Canvas
+		 * `getContext2d` will also enable/disable antialiasing features based on global settings.
+		 * @name getContext2D
 		 * @memberOf me.video
 		 * @function
-		 * @deprecated
-		 * @param {Int} width width
-		 * @param {Int} height height
+		 * @param {Canvas}
 		 * @return {Context2D}
 		 */
-		api.createCanvasSurface = function(width, height) {
-			var _canvas = api.createCanvas(width, height, false);
-			var _context = _canvas.getContext('2d');
+		api.getContext2d = function(canvas) {
+			if (navigator.isCocoonJS) {
+				// cocoonJS specific extension
+				var _context = canvas.getContext('2d', { "antialias" : me.sys.scalingInterpolation });
+			} else {
+				var _context = canvas.getContext('2d');				
+			}
 			if (!_context.canvas) {
-				_context.canvas = _canvas;
+				_context.canvas = canvas;
 			}
 			me.video.setImageSmoothing(_context, me.sys.scalingInterpolation);
 			return _context;
@@ -432,39 +450,64 @@
 		};
 		
 		/**
+		 * return the device pixel ratio
+		 * @name getDevicePixelRatio
+		 * @memberOf me.video
+		 * @function
+		 */
+		api.getDevicePixelRatio = function() {
+			
+			if (devicePixelRatio===null) {
+				var _context = me.video.getScreenContext();
+				var _devicePixelRatio = window.devicePixelRatio || 1,
+					_backingStoreRatio = _context.webkitBackingStorePixelRatio ||
+										_context.mozBackingStorePixelRatio ||
+										_context.msBackingStorePixelRatio ||
+										_context.oBackingStorePixelRatio ||
+										_context.backingStorePixelRatio || 1;
+				devicePixelRatio = _devicePixelRatio / _backingStoreRatio;
+			}
+			return devicePixelRatio;
+		};
+		
+		/**
 		 * callback for window resize event
 		 * @ignore
 		 */
 		api.onresize = function(event){
+			// default (no scaling)
+			var scaleX = 1, scaleY = 1;
+			
 			if (auto_scale) {
 				// get the parent container max size
 				var parent = me.video.getScreenCanvas().parentNode;
-				var max_width = parent.width || window.innerWidth;
-				var max_height = parent.height || window.innerHeight;
-				
-				if (deferResizeId) {
-					// cancel any previous pending resize
-					clearTimeout(deferResizeId);
-				}
+				var _max_width = Math.min(maxWidth, parent.width || window.innerWidth);
+				var _max_height = Math.min(maxHeight, parent.height || window.innerHeight);
 
 				if (maintainAspectRatio) {
 					// make sure we maintain the original aspect ratio
 					var designRatio = me.video.getWidth() / me.video.getHeight();
-					var screenRatio = max_width / max_height;
+					var screenRatio = _max_width / _max_height;
 					if (screenRatio < designRatio)
-						var scale = max_width / me.video.getWidth();
+						scaleX = scaleY = _max_width / me.video.getWidth();
 					else
-						var scale = max_height / me.video.getHeight();
-		
-					// update the "front" canvas size
-					deferResizeId = me.video.updateDisplaySize.defer(scale,scale);
+						scaleX = scaleY = _max_height / me.video.getHeight();
 				} else {
 					// scale the display canvas to fit with the parent container
-					deferResizeId = me.video.updateDisplaySize.defer( 
-						max_width / me.video.getWidth(),
-						max_height / me.video.getHeight()
-					);
+					scaleX = _max_width / me.video.getWidth();
+					scaleY = _max_height / me.video.getHeight();
 				}
+			}
+			// adjust scaling ratio based on the device pixel ratio
+			scaleX *= me.video.getDevicePixelRatio();
+			scaleY *= me.video.getDevicePixelRatio();
+			// scale if required
+			if (scaleX!==1 || scaleY !==1) {
+				if (deferResizeId) {
+					// cancel any previous pending resize
+					clearTimeout(deferResizeId);
+				}
+				deferResizeId = me.video.updateDisplaySize.defer(scaleX , scaleY);
 				return;
 			}
 			// make sure we have the correct relative canvas position cached
@@ -482,10 +525,16 @@
 		api.updateDisplaySize = function(scaleX, scaleY) {
 			// update the global scale variable
 			me.sys.scale.set(scaleX,scaleY);
+			
 			// apply the new value
 			canvas.width = game_width_zoom = backBufferCanvas.width * scaleX;
 			canvas.height = game_height_zoom = backBufferCanvas.height * scaleY;
-			
+			// adjust CSS style for High-DPI devices
+			if (me.video.getDevicePixelRatio()>1) {
+				canvas.style.width = (canvas.width / me.video.getDevicePixelRatio()) + 'px';
+				canvas.style.height = (canvas.height / me.video.getDevicePixelRatio()) + 'px';
+			}
+			 
 			// make sure we have the correct relative canvas position cached
 			me.input.offset = me.video.getPos();
 
@@ -516,23 +565,6 @@
 			context.fillStyle = col;
 			context.fillRect(0, 0, w, h);
 			context.restore();
-		};
-
-		/**
-		 * scale & keep canvas centered<p>
-		 * useful for zooming effect
-		 * @name scale
-		 * @memberOf me.video
-		 * @function
-		 * @param {Context2D} context Canvas context
-		 * @param {Number} scale Scaling multiplier
-		 */
-		api.scale = function(context, scale) {
-			context.translate(
-							-(((context.canvas.width * scale) - context.canvas.width) >> 1),
-							-(((context.canvas.height * scale) - context.canvas.height) >> 1));
-			context.scale(scale, scale);
-
 		};
 		
 		/**
@@ -608,7 +640,7 @@
 		 */
 		api.applyRGBFilter = function(object, effect, option) {
 			//create a output canvas using the given canvas or image size
-			var fcanvas = api.createCanvasSurface(object.width, object.height, false);
+			var _context = api.getContext2d(api.createCanvas(object.width, object.height, false));
 			// get the pixels array of the give parameter
 			var imgpix = me.utils.getPixels(object);
 			// pointer to the pixels data
@@ -652,10 +684,10 @@
 			}
 
 			// put our modified image back in the new filtered canvas
-			fcanvas.putImageData(imgpix, 0, 0);
+			_context.putImageData(imgpix, 0, 0);
 
 			// return it
-			return fcanvas;
+			return _context;
 		};
 
 		// return our api
