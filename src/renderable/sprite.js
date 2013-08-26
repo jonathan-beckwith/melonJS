@@ -29,9 +29,6 @@
 		/** @ignore */
 		scale	   : null,
 
-		// if true, image flipping/scaling is needed
-		scaleFlag : false,
-
 		// just to keep track of when we flip
 		lastflipX : false,
 		lastflipY : false,
@@ -98,7 +95,6 @@
 			// scale factor of the object
 			this.scale = new me.Vector2d(1.0, 1.0);
 			this.lastflipX = this.lastflipY = false;
-			this.scaleFlag = false;
 
 			// set the default sprite index & offset
 			this.offset = new me.Vector2d(0, 0);
@@ -181,11 +177,7 @@
 			if (flip != this.lastflipX) {
 				this.lastflipX = flip;
 
-				// invert the scale.x value
-				this.scale.x = -this.scale.x;
-
-				// set the scaleFlag
-				this.scaleFlag = ((this.scale.x != 1.0) || (this.scale.y != 1.0))
+				this.transform.scale(-1, 1);
 			}
 		},
 
@@ -200,11 +192,7 @@
 			if (flip != this.lastflipY) {
 				this.lastflipY = flip;
 
-				// invert the scale.x value
-				this.scale.y = -this.scale.y;
-
-				// set the scaleFlag
-				this.scaleFlag = ((this.scale.x != 1.0) || (this.scale.y != 1.0))
+				this.transform.scale(1, -1);
 			}
 		},
 
@@ -217,10 +205,7 @@
 		 */
 		resize : function(ratio) {
 			if (ratio > 0) {
-				this.scale.x = this.scale.x < 0.0 ? -ratio : ratio;
-				this.scale.y = this.scale.y < 0.0 ? -ratio : ratio;
-				// set the scaleFlag
-				this.scaleFlag = ((this.scale.x!= 1.0)  || (this.scale.y!= 1.0))
+				this.transform.scale(ratio, ratio);
 			}
 		},
 
@@ -302,34 +287,31 @@
 			var w = this.width, h = this.height;
 			var angle = this.angle + this._sourceAngle;
 
-			if ((this.scaleFlag) || (angle!==0)) {
-				// calculate pixel pos of the anchor point
-				var ax = w * this.anchorPoint.x, ay = h * this.anchorPoint.y;
-				// translate to the defined anchor point
-				context.translate(xpos + ax, ypos + ay);
-				// scale
-				if (this.scaleFlag)
-					context.scale(this.scale.x, this.scale.y);
-				if (angle!==0)
-					context.rotate(angle);
+			// calculate pixel pos of the anchor point
+			var ax = w * this.anchorPoint.x, ay = h * this.anchorPoint.y;
 
-				if (this._sourceAngle!==0) {
-					// swap w and h for rotated source images
-					w = this.height, h = this.width;
-					xpos = -ay, ypos = -ax;
-				}
-				else
-					// reset coordinates back to upper left coordinates
-					xpos = -ax, ypos = -ay;
+			// apply transformation
+			context.transform(
+				this.transform.a, this.transform.b,
+				this.transform.c, this.transform.d,
+				this.transform.e + xpos + ax, this.transform.f + xpos + ay
+			);
+		
+			if (this._sourceAngle!==0) {
+				// swap w and h for rotated source images
+				w = this.height, h = this.width;
 			}
 
-			context.drawImage(this.image,
-							this.offset.x, this.offset.y,
-							w, h,
-							xpos, ypos,
-							w, h);
+			// draw the image
+			context.drawImage(
+				this.image,
+				this.offset.x, this.offset.y,
+				w, h,
+				xpos - ax, ypos - ay,
+				w, h
+			);
 
-			
+
 			// restore the context
 			context.restore();
 				
