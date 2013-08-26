@@ -55,6 +55,17 @@
 		 */
 		_sourceAngle: 0,
 
+
+		/**
+		 * transformation matrix <br>
+		 * @public
+		 * @type me.Matrix2d
+		 * @name z
+		 * @memberOf me.SpriteObject
+		 */
+		transform : null,
+
+
 		/**
 		 * Define the sprite opacity<br>
 		 * @see me.SpriteObject#setOpacity
@@ -95,6 +106,9 @@
 			// scale factor of the object
 			this.scale = new me.Vector2d(1.0, 1.0);
 			this.lastflipX = this.lastflipY = false;
+
+			// set a default transformation matrix
+			this.transform = new me.Matrix2d();
 
 			// set the default sprite index & offset
 			this.offset = new me.Vector2d(0, 0);
@@ -205,7 +219,24 @@
 		 */
 		resize : function(ratio) {
 			if (ratio > 0) {
-				this.transform.scale(ratio, ratio);
+				// resize was not cumulative previously
+				// so manage the case where we previosuly
+				// had a scale factor set
+				var scaleX = 1, scaleY = 1;
+
+				if (this.scale.x != ratio) {
+					scaleX = this.scale.x = (1/this.scale.x)*ratio;
+				}
+
+				if (this.scale.y != ratio) {
+					scaleY = this.scale.y = (1/this.scale.y)*ratio;
+				}
+
+				// apply 1 or the new scaling factor
+				this.transform.scale(
+					scaleX, 
+					scaleY
+				);
 			}
 		},
 

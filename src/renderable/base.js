@@ -98,14 +98,6 @@
 		 */
 		z : 0,
 
-		/**
-		 * the renderable transformation matrix <br>
-		 * @public
-		 * @type me.Matrix2d
-		 * @name z
-		 * @memberOf me.Renderable
-		 */
-		transform : null,
 
 		/**
 		 * @ignore
@@ -114,8 +106,6 @@
 			// call the parent constructor
 			this.parent(pos, width, height);
 
-			// set a default transformation matrix
-			this.transform = new me.Matrix2d();
 		},
 
 		/**

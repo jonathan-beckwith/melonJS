@@ -1012,19 +1012,19 @@
 			return this;
 		},
 
-		/**
-		 * multiply both matrix
-		 * @name set
-		 * @memberOf me.Matrix2d
-		 * @function
-	 	 * @param {Number} a the m1,1 (m11) value in the matrix
-	 	 * @param {Number} b the m1,2 (m12) value in the matrix
-	 	 * @param {Number} c the m2,1 (m21) value in the matrix
-	 	 * @param {Number} d the m2,2 (m22) value in the matrix
-	 	 * @param {Number} [e] The delta x (dx) value in the matrix
-	 	 * @param {Number} [f] The delta x (dy) value in the matrix
-		 * @return {me.Matrix2d} this matrix
-		 */
+	   /**
+		* multiply both matrix
+		* @name multiply
+		* @memberOf me.Matrix2d
+		* @function
+		* @param {Number} a the m1,1 (m11) value in the matrix
+		* @param {Number} b the m1,2 (m12) value in the matrix
+		* @param {Number} c the m2,1 (m21) value in the matrix
+		* @param {Number} d the m2,2 (m22) value in the matrix
+		* @param {Number} [e] The delta x (dx) value in the matrix
+		* @param {Number} [f] The delta x (dy) value in the matrix
+		* @return {me.Matrix2d} this matrix
+		*/
 		multiply : function(a, b, c, d, e, f) {
 			var a = this.a;
 			var b = this.b;
@@ -1053,10 +1053,10 @@
 			sy = (sy === undefined) ? sx : sy;
 
 			this.a *= sx; //(a)
-			this.c *= sx; //(c)
+			//this.c *= sx; //(c)
 			this.e *= sx;
 				
-			this.b *= sy; //(b)
+			//this.b *= sy; //(b)
 			this.d *= sy; //(d)
 			this.f *= sy;
 
