@@ -121,13 +121,6 @@
 		 * @ignore
 		 */
 		_scale : null,
-
-		/**
-		 * Source rotation angle for pre-rotating the renderable <br>
-		 * Commonly used for TexturePacker
-		 * @ignore
-		 */
-		_sourceAngle: 0,
 		
 
 		/**
@@ -138,12 +131,19 @@
 			this.parent(pos, width, height);
 			
 			// reset default scale and angle
-			this._scale = new me.Vector2d(1.0, 1.0);
-			
-			this._sourceAngle = this.angle = 0;
+			if (this._scale === null) {
+				this._scale = new me.Vector2d(1.0, 1.0);
+			} else {
+				this._scale.set(1.0, 1.0);
+			}
+			this.angle = 0;
 			
 			// set a default transformation matrix
-			this.matrix = new me.Matrix2d();
+			if (this.matrix === null) {
+				this.matrix = new me.Matrix2d();
+			} else {
+				this.matrix.identity();
+			}
 
 		},
 		
@@ -189,9 +189,10 @@
 		 * @memberOf me.Renderable
 		 * @function
 		 * @public
+		 * @param {Number} angle the rotation angle in radians
 		 **/
 		rotate : function(angle) {
-			if (angle != this.angle) {
+			if (angle !== this.angle) {
 				this.angle = angle - this.angle;
 				this.matrix.rotate(this.angle);
 			}
@@ -200,23 +201,23 @@
 		/**
 		 * scale the renderable around his anchor point<br>
 		 * @name scale
-		 * @memberOf me.SpriteObject
+		 * @memberOf me.Renderable
 		 * @function
 		 * @param {Number} scaleX x scaling ratio
-		 * @param {Number} scaleY x scaling ratio
+		 * @param {Number} [scaleY=scaleX] y scaling ratio
 		 */
 		scale : function(scaleX, scaleY) {
 	
 			// set to scaleX if not defined
 			scaleY = (scaleY === undefined) ? scaleX : scaleY;
 			
-			if (this._scale.x != scaleX) {
+			if (this._scale.x !== scaleX) {
 				scaleX = this._scale.x = (1/this._scale.x) * scaleX;
 			} else {
 				scaleX = 1;
 			}
 			
-			if (this._scale.y != scaleY) {
+			if (this._scale.y !== scaleY) {
 				scaleY = this._scale.y = (1/this._scale.y) * scaleY;
 			} else {
 				scaleY = 1;

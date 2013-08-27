@@ -51,6 +51,14 @@
 		flickercb : null,
 		flickerState : false,
 
+		/**
+		 * Source rotation angle for pre-rotating the renderable <br>
+		 * Commonly used for TexturePacker
+		 * @ignore
+		 */
+		_sourceAngle: 0,
+
+
 
 		/**
 		 * @ignore
@@ -73,7 +81,11 @@
 			this.lastflipX = this.lastflipY = false;
 
 			// set the default sprite index & offset
-			this.offset = new me.Vector2d(0, 0);
+			if (this.offset === null) {
+				this.offset = new me.Vector2d(0, 0);
+			} else {
+				this.offset.set(0, 0);
+			}
 
 			// ensure it's fully opaque by default
 			this.alpha = 1.0;			
@@ -85,7 +97,11 @@
 			this.isPersistent = false;
 			
 			// and not flickering
-			this.flickering = false
+			this.flickering = false;
+
+			// reset the sourceAngle
+			this._sourceAngle = 0;
+			
 		},
 
 		/**
