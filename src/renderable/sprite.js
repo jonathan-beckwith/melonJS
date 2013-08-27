@@ -25,46 +25,12 @@
 	me.SpriteObject = me.Renderable.extend(
 	/** @scope me.SpriteObject.prototype */
 	{
-		// default scale ratio of the object
-		/** @ignore */
-		scale	   : null,
-
 		// just to keep track of when we flip
 		lastflipX : false,
 		lastflipY : false,
 
-		// z position (for ordering display)
-		z : 0,
-
 		// image offset
 		offset : null,
-
-		/**
-		 * Set the angle (in Radians) of a sprite to rotate it <br>
-		 * WARNING: rotating sprites decreases performances
-		 * @public
-		 * @type Number
-		 * @name me.SpriteObject#angle
-		 */
-		angle: 0,
-
-		/**
-		 * Source rotation angle for pre-rotating the source image<br>
-		 * Commonly used for TexturePacker
-		 * @ignore
-		 */
-		_sourceAngle: 0,
-
-
-		/**
-		 * transformation matrix <br>
-		 * @public
-		 * @type me.Matrix2d
-		 * @name z
-		 * @memberOf me.SpriteObject
-		 */
-		transform : null,
-
 
 		/**
 		 * Define the sprite opacity<br>
@@ -103,12 +69,8 @@
 			// cache image reference
 			this.image = image;
 
-			// scale factor of the object
-			this.scale = new me.Vector2d(1.0, 1.0);
+			// flip status of the object
 			this.lastflipX = this.lastflipY = false;
-
-			// set a default transformation matrix
-			this.transform = new me.Matrix2d();
 
 			// set the default sprite index & offset
 			this.offset = new me.Vector2d(0, 0);
@@ -190,8 +152,7 @@
 		flipX : function(flip) {
 			if (flip != this.lastflipX) {
 				this.lastflipX = flip;
-
-				this.transform.scale(-1, 1);
+				this.matrix.scale(-1, 1);
 			}
 		},
 
@@ -205,38 +166,7 @@
 		flipY : function(flip) {
 			if (flip != this.lastflipY) {
 				this.lastflipY = flip;
-
-				this.transform.scale(1, -1);
-			}
-		},
-
-		/**
-		 * Resize the sprite around his center<br>
-		 * @name resize
-		 * @memberOf me.SpriteObject
-		 * @function
-		 * @param {Number} ratio scaling ratio
-		 */
-		resize : function(ratio) {
-			if (ratio > 0) {
-				// resize was not cumulative previously
-				// so manage the case where we previosuly
-				// had a scale factor set
-				var scaleX = 1, scaleY = 1;
-
-				if (this.scale.x != ratio) {
-					scaleX = this.scale.x = (1/this.scale.x)*ratio;
-				}
-
-				if (this.scale.y != ratio) {
-					scaleY = this.scale.y = (1/this.scale.y)*ratio;
-				}
-
-				// apply 1 or the new scaling factor
-				this.transform.scale(
-					scaleX, 
-					scaleY
-				);
+				this.matrix.scale(1, -1);
 			}
 		},
 
@@ -314,18 +244,19 @@
 
 			// clamp position vector to pixel grid
 			var xpos = ~~this.pos.x, ypos = ~~this.pos.y;
-
 			var w = this.width, h = this.height;
-			var angle = this.angle + this._sourceAngle;
-
+	
 			// calculate pixel pos of the anchor point
 			var ax = w * this.anchorPoint.x, ay = h * this.anchorPoint.y;
-
+			
+			// rotate the canvas if required
+			this.rotate(this.angle + this._sourceAngle);
+			
 			// apply transformation
 			context.transform(
-				this.transform.a, this.transform.b,
-				this.transform.c, this.transform.d,
-				this.transform.e + xpos + ax, this.transform.f + xpos + ay
+				this.matrix.a, this.matrix.b,
+				this.matrix.c, this.matrix.d,
+				this.matrix.e + xpos + ax, this.matrix.f + ypos + ay
 			);
 		
 			if (this._sourceAngle!==0) {

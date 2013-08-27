@@ -97,7 +97,38 @@
 		 * @memberOf me.Renderable
 		 */
 		z : 0,
+		
+		/**
+		 * Set the angle (in Radians) of a renderable to rotate it <br>
+		 * WARNING: rotating sprites decreases performances
+		 * @public
+		 * @type Number
+		 * @name me.SpriteObject#angle
+		 */
+		angle: 0,
+		
+		/**
+		 * the renderable transformation matrix <br>
+		 * @public
+		 * @type me.Matrix2d
+		 * @name matrix
+		 * @memberOf me.Renderable
+		 */
+		matrix : null,
+		
+		/*
+		 * current scale factor of the renderable
+		 * @ignore
+		 */
+		_scale : null,
 
+		/**
+		 * Source rotation angle for pre-rotating the renderable <br>
+		 * Commonly used for TexturePacker
+		 * @ignore
+		 */
+		_sourceAngle: 0,
+		
 
 		/**
 		 * @ignore
@@ -105,8 +136,99 @@
 		init : function(pos, width, height) {
 			// call the parent constructor
 			this.parent(pos, width, height);
+			
+			// reset default scale and angle
+			this._scale = new me.Vector2d(1.0, 1.0);
+			
+			this._sourceAngle = this.angle = 0;
+			
+			// set a default transformation matrix
+			this.matrix = new me.Matrix2d();
 
 		},
+		
+		/**
+		 * update the transformation matrix with the specified values.<br>
+		 * (the current matrix will be multiplied using the specified values)
+		 * @name transform
+		 * @memberOf me.Renderable
+		 * @function
+		 * @public
+		 * @param {Number} a the m1,1 (m11) value in the matrix
+		 * @param {Number} b the m1,2 (m12) value in the matrix
+		 * @param {Number} c the m2,1 (m21) value in the matrix
+		 * @param {Number} d the m2,2 (m22) value in the matrix
+		 * @param {Number} e The delta x (dx) value in the matrix
+		 * @param {Number} f The delta x (dy) value in the matrix
+		 **/
+		transform : function(a ,b, c, d, e, f) {
+			this.matrix.multiply(a ,b, c, d, e, f);
+		},
+		
+		/**
+		 * set the renderable transformation matrix to new values.<br>
+		 * (setTransform will reset the matrix to the identity one before applying the new value)
+		 * @name setTransform
+		 * @memberOf me.Renderable
+		 * @function
+		 * @public
+		 * @param {Number} a the m1,1 (m11) value in the matrix
+		 * @param {Number} b the m1,2 (m12) value in the matrix
+		 * @param {Number} c the m2,1 (m21) value in the matrix
+		 * @param {Number} d the m2,2 (m22) value in the matrix
+		 * @param {Number} e The delta x (dx) value in the matrix
+		 * @param {Number} f The delta x (dy) value in the matrix
+		 **/
+		setTransform : function(a ,b, c, d, e, f) {
+			this.matrix.set(a ,b, c, d, e, f);
+		},
+		
+		/**
+		 * rotate the renderable around its anchor point
+		 * @name rotate
+		 * @memberOf me.Renderable
+		 * @function
+		 * @public
+		 **/
+		rotate : function(angle) {
+			if (angle != this.angle) {
+				this.angle = angle - this.angle;
+				this.matrix.rotate(this.angle);
+			}
+		},
+		
+		/**
+		 * scale the renderable around his anchor point<br>
+		 * @name scale
+		 * @memberOf me.SpriteObject
+		 * @function
+		 * @param {Number} scaleX x scaling ratio
+		 * @param {Number} scaleY x scaling ratio
+		 */
+		scale : function(scaleX, scaleY) {
+	
+			// set to scaleX if not defined
+			scaleY = (scaleY === undefined) ? scaleX : scaleY;
+			
+			if (this._scale.x != scaleX) {
+				scaleX = this._scale.x = (1/this._scale.x) * scaleX;
+			} else {
+				scaleX = 1;
+			}
+			
+			if (this._scale.y != scaleY) {
+				scaleY = this._scale.y = (1/this._scale.y) * scaleY;
+			} else {
+				scaleY = 1;
+			}
+			
+			// apply the scaling factor
+			this.matrix.scale(
+				scaleX, 
+				scaleY
+			);
+		},
+		
 
 		/**
 		 * update function

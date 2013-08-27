@@ -1046,12 +1046,11 @@
 		 * @memberOf me.Matrix2d
 		 * @function
 	 	 * @param {Number} sx a number representing the abscissa of the scaling vector.
-	 	 * @param {Number} [sy] a number representing the abscissa of the scaling vector. If not present, its default value is sx, leading to a uniform scaling preserving the shape of the element.
+	 	 * @param {Number} sy a number representing the abscissa of the scaling vector. If not present, its default value is sx, leading to a uniform scaling preserving the shape of the element.
 		 * @return {me.Matrix2d} this matrix
 		 */
 		scale : function(sx ,sy) {
-			sy = (sy === undefined) ? sx : sy;
-
+		 
 			this.a *= sx; //(a)
 			//this.c *= sx; //(c)
 			this.e *= sx;
