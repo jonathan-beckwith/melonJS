@@ -199,14 +199,14 @@
 		},
 		
 		/**
-		 * scale the renderable around his anchor point<br>
-		 * @name scale
+		 * resize the renderable (scale around his anchor point)<br>
+		 * @name resize
 		 * @memberOf me.Renderable
 		 * @function
 		 * @param {Number} scaleX x scaling ratio
 		 * @param {Number} [scaleY=scaleX] y scaling ratio
 		 */
-		scale : function(scaleX, scaleY) {
+		resize : function(scaleX, scaleY) {
 	
 			// set to scaleX if not defined
 			scaleY = (scaleY === undefined) ? scaleX : scaleY;
