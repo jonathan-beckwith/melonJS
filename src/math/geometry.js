@@ -999,7 +999,7 @@
 	 	 * @param {Number} c the m2,1 (m21) value in the matrix
 	 	 * @param {Number} d the m2,2 (m22) value in the matrix
 	 	 * @param {Number} [e] The delta x (dx) value in the matrix
-	 	 * @param {Number} [f] The delta x (dy) value in the matrix
+	 	 * @param {Number} [f] The delta y (dy) value in the matrix
 		 * @return {me.Matrix2d} this matrix
 		 */
 		set : function(a ,b, c, d, e, f) {
@@ -1008,7 +1008,7 @@
 			this.c = c;
 			this.d = d;
 			this.e = e || this.e;
-			this.e = f || this.e;
+			this.e = f || this.f;
 			return this;
 		},
 
@@ -1022,21 +1022,21 @@
 		* @param {Number} c the m2,1 (m21) value in the matrix
 		* @param {Number} d the m2,2 (m22) value in the matrix
 		* @param {Number} [e] The delta x (dx) value in the matrix
-		* @param {Number} [f] The delta x (dy) value in the matrix
+		* @param {Number} [f] The delta y (dy) value in the matrix
 		* @return {me.Matrix2d} this matrix
 		*/
 		multiply : function(a, b, c, d, e, f) {
-			var a = this.a;
-			var b = this.b;
-			var c = this.c;
-			var d = this.d;
+			var a1 = this.a;
+			var b1 = this.b;
+			var c1 = this.c;
+			var d1 = this.d;
 
-			this.a  = a * a + b * c;
-			this.b  = a * b + b * d;
-			this.c  = c * a + d * c;
-			this.d  = c * b + d * d;
-			this.e = e * a + f * c + this.e;
-			this.f = e * b + f * d + this.f;
+			this.a  = a * a1 + b * c1;
+			this.b  = a * b1 + b * d1;
+			this.c  = c * a1 + d * c1;
+			this.d  = c * b1 + d * d1;
+			this.e = e * a1 + f * c1 + this.e;
+			this.f = e * b1 + f * d1 + this.f;
 			return this;
 		},
 
@@ -1046,17 +1046,15 @@
 		 * @memberOf me.Matrix2d
 		 * @function
 	 	 * @param {Number} sx a number representing the abscissa of the scaling vector.
-	 	 * @param {Number} sy a number representing the abscissa of the scaling vector. If not present, its default value is sx, leading to a uniform scaling preserving the shape of the element.
+	 	 * @param {Number} sy a number representing the abscissa of the scaling vector.
 		 * @return {me.Matrix2d} this matrix
 		 */
 		scale : function(sx ,sy) {
 		 
-			this.a *= sx; //(a)
-			//this.c *= sx; //(c)
+			this.a *= sx;
+			this.d *= sy;
+			
 			this.e *= sx;
-				
-			//this.b *= sy; //(b)
-			this.d *= sy; //(d)
 			this.f *= sy;
 
 			return this;
@@ -1070,10 +1068,10 @@
 	 	 * @param {Number} a an angle representing the angle of the rotation. A positive angle denotes a clockwise rotation, a negative angle a counter-clockwise one.
 		 * @return {me.Matrix2d} this matrix
 		 */
-		rotate : function(a) {
-			if (a !== 0) {
-				var cos = Math.cos(a);
-				var sin = Math.sin(a);
+		rotate : function(angle) {
+			if (angle !== 0) {
+				var cos = Math.cos(angle);
+				var sin = Math.sin(angle);
 				var a = this.a;
 				var b = this.b;
 				var c = this.c;

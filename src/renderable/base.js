@@ -159,7 +159,7 @@
 		 * @param {Number} c the m2,1 (m21) value in the matrix
 		 * @param {Number} d the m2,2 (m22) value in the matrix
 		 * @param {Number} e The delta x (dx) value in the matrix
-		 * @param {Number} f The delta x (dy) value in the matrix
+		 * @param {Number} f The delta y (dy) value in the matrix
 		 **/
 		transform : function(a ,b, c, d, e, f) {
 			this.matrix.multiply(a ,b, c, d, e, f);
@@ -177,7 +177,7 @@
 		 * @param {Number} c the m2,1 (m21) value in the matrix
 		 * @param {Number} d the m2,2 (m22) value in the matrix
 		 * @param {Number} e The delta x (dx) value in the matrix
-		 * @param {Number} f The delta x (dy) value in the matrix
+		 * @param {Number} f The delta y (dy) value in the matrix
 		 **/
 		setTransform : function(a ,b, c, d, e, f) {
 			this.matrix.set(a ,b, c, d, e, f);
