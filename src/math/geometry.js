@@ -1008,7 +1008,7 @@
 			this.c = c;
 			this.d = d;
 			this.e = e || this.e;
-			this.e = f || this.f;
+			this.f = f || this.f;
 			return this;
 		},
 
